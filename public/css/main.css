@@ -1,7 +1,64 @@
+body {
+    margin: 0 auto;
+    padding: 0 auto;
 
+}
 
 .hero {
-    background: black url('/images/splashpage.jpg') center/ cover;
+    background-image: url('/images/splashpage.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.card-header-title {
+    padding-left: 65px;
+    padding-right: 30px;
+}
+
+.cardSpecify {
+    border-radius: 25px;
+    margin: 20px !important;
+    overflow: scroll;
+    text-overflow: ellipsis;
+}
+
+.cardSpecifyMember {
+    border-radius: 25px;
+    margin: 20px !important;
+    max-width: 300px;
+    max-height: 300px;
+    overflow: scroll;
+}
+
+.memberTitle {
+    text-align: center;
+    color: black;
+    font-weight: bold;
+    font-family: 'Bangers', cursive;
+    text-transform: capitalize;
+    letter-spacing: 3px;
+    font-size: 25px;
+}
+
+a:hover.memberLink{
+color: grey;
+}
+
+.profileTitle {
+    text-align: center;
+    color: black;
+    font-weight: bold;
+    font-family: 'Bangers', cursive;
+    text-transform: capitalize;
+    letter-spacing: 5px;
+    font-size: 35px;
+}
+
+.emailTitle {
+    text-align: center;
+    font-weight: bold;
+    font-size: 15px;
 }
 
 .title {
@@ -11,6 +68,13 @@
 
 .subtitle {
     font-family: 'Jura', sans-serif;
+}
+
+.subtitleBlack {
+    font-family: 'Jura', sans-serif;
+    color: black;
+    font-size: 15px;
+
 }
 
 .input {
@@ -38,7 +102,7 @@
     font-family: 'Bangers', cursive;
     color: black;
     font-size: 40px;
-}    
+}
 
 #profile-title {
     font-family: 'Bangers', cursive;
@@ -82,4 +146,42 @@
 #backToSignUp {
     font-family: 'Jura', sans-serif;
     font-size: 18px;
+}
+
+.geekModal {
+    /* display: none !important;  */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    /* width: 70%; */
+    overflow: scroll !important;
+    transform: translate(-50%, -50%);
+    background-color: rgb(241, 237, 238);
+    height: 500px;
+}
+
+.myContent{
+    background-color: white;
+    width: 100%;
+}
+
+#cardHeaderh1 {
+    width: 100%;
+    height: 100%;
+    font-size: 35px;
+    background-color: white;
+    color: black;
+    font-family: 'Bangers', cursive;
+    text-align: center;
+    
+}
+.close{
+    padding-bottom: 50px;
+}
+#cardHeaderModal {
+    font-size: 25px;
+    color: black;
+    font-family: 'Jura', sans-serif;
+    text-align: center;
+    font-weight: bold;
 }

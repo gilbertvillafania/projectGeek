@@ -1,18 +1,18 @@
-var express = require('express')
-var path = require('path')
-var session = require("express-session");
+const express = require('express')
+const path = require('path')
+const session = require("express-session");
 
-var passport = require("./config/passport")
+const passport = require("./config/passport")
 
 LocalStrategy = require('passport-local').Strategy;
 
-var flash = require('connect-flash');
+const flash = require('connect-flash');
 
-var db = require('./models');
+const db = require('./models');
 
-var PORT = process.env.PORT || 8080
+const PORT = process.env.PORT || 8080
 
-var app = express();
+const app = express();
 
 app.set("view engine", "pug");
 
@@ -39,7 +39,7 @@ require('./controller/html-routes.js')(app);
 require('./controller/api-routes.js')(app);
 
 
-db.sequelize.sync({force: true}).then(function() {
+db.sequelize.sync({force: false}).then(function() {
 app.listen(PORT, function () {
 console.log(`'Server listening at http://localhost' ${PORT}`)
 })

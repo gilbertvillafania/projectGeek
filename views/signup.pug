@@ -28,7 +28,7 @@ html
                     input#username-input.input.is-small(type='form-control', placeholder='Username', name='reqUser', autofocus='')
                 .field
                   .control
-                    input#password-input.input.is-small(type='form-control', placeholder='Password', autofocus='', name='reqPassword', required='')
+                    input#password-input.input.is-small(type='password', placeholder='Password', autofocus='', name='reqPassword', required='')
                 .field
                   .control
                     input#email-input.input.is-small(type='form-control', placeholder='email', autofocus='', name='reqEmail', required='')
@@ -38,10 +38,55 @@ html
                 .field
                   .control
                     input#profile-input.input.is-small(type='form-control', placeholder='Your Photo/Avatar', autofocus='')
-                button#submit.button.is-block.is-info.is-medium.is-fullwidth(type='submit', onclick="window.location.href = '/signup';") Sign up!
-          p#login.has-text-grey
-            a(href='login') Log In
-            |       
-    #usernameResponseHidden
-    script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
-    script(src='./js/signup.js')
+              h4.subtitleBlack Who is your Favorite Hero/Superhero?
+                .field
+                  .control
+                    input#hero-input.input.is-small(type='form-control', placeholder='Superman, Batman, Spiderman', autofocus='')
+              h4.subtitleBlack What is your favorite Movie?
+                .field
+                  .control
+                    input#movie-input.input.is-small(type='form-control', placeholder='Favorite Movie', autofocus='')
+              h4.subtitleBlack If you could live in any fantasy world, what would it be?
+                .field
+                  .control
+                    input#world-input.input.is-small(type='form-control', placeholder='Narnia, midgar,spira,', autofocus='')
+                button#nextSubmit.button.is-block.is-info.is-medium.is-fullwidth Continue
+          p#login.has-text-white
+            button.button.is-info.is-medium(onclick="window.location.href = 'login';")  Log In
+            |       
+.geekModal.cardSpecify
+  .myContent
+    p#cardHeaderh1.card-header-title Answer these additional questions to continue!
+        .columns.is-mobile.is-centered
+          .column.is-half
+            p
+              h4.cardHeaderModal What are some of your favorite fandoms?
+                p.subtitle (i.e Harry Potter, Game Of Thrones, Doctor Who)
+                  .field
+                    .control
+                      input#fandom-input.input.is-small(type='form-control', autofocus='')
+            p
+              h4.cardHeaderModal What kind of things are you interested in the most?
+                p.subtitle (i.e Comic Books, Music, Art, Movies, Tv shows, Cosplaying, RPGs)
+                  .field
+                    .control
+                      input#interest-input.input.is-small(type='form-control', autofocus='')  
+            p          
+              h4.cardHeaderModal What's your favorite tv show?
+                p
+                div 
+                  .field
+                    .control
+                      input#tv-input.input.is-small(type='form-control', autofocus='') 
+            p           
+              h4.cardHeaderModal If you could have any super power what would it be?
+                p
+                div
+                  .field
+                    .control
+                      input#superpower-input.input.is-small(type='form-control', autofocus='')
+  .columns.is-centered
+    .column.is-half          
+        button.button.is-large.is-light.close#submit(href='members') Create your Profile
+script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js')
+script(src='./js/signup.js')

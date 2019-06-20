@@ -3,41 +3,29 @@ var passport = require("../config/passport");
 var nodemailer = require('nodemailer');
 var async = require('async');
 var crypto = require('crypto');
+var bcrypt = require("bcrypt-nodejs");
 
 module.exports = function (app) {
-    app.get("/members/:username", function (req, res) {
-        db.User.findOne({
-            where: {
-                username: req.params.username
-            }
-        }).then(function (dbUser) {
-            return res.json(dbUser)
-        })
-    })
-
-
-    // app.get("/api/members", function (req, res) {
-    //     db.User.findOne({
-    //         username: req.query.username,
-    //         email: req.body.email
-    //     }, function (err, user) {
-    //         var message;
-    //         if (err) {
-    //             console.log(err);
-    //         } else if (user) {
-    //             console.log(user)
-    //             message = "user exists";
-    //             console.log(message)
-    //         } else {
-    //             message = "success!"
-    //             console.log(message)
-    //             res.json({
-    //                 message: message
-    //             });
+    // app.put("/api/signup", function (req, res) {
+    //     console.log(req.body)
+    //     var user = req.body.username
+    //     var fandom = req.body.faveFandoms
+    //     console.log("User Info" + " " + user)
+    //     console.log("Favorite fandoms" + " " + fandom)
+    //     db.User.update({
+    //         fandom: fandom
+    //     }, {
+    //         where: {
+    //             id: req.params.id
     //         }
-
+    //     }).then(function (data) {
+    //         res.json(data)
+    //     }).catch(function (err) {
+    //         console.log(err)
+    //         res.json(err)
     //     })
     // })
+    // loop over each array, db.User.interests:creating inside of a loop for fandom and interests 
 
     app.post("/api/signup", function (req, res) {
         console.log(req.body);
@@ -47,7 +35,14 @@ module.exports = function (app) {
             email: req.body.email,
             password: req.body.password,
             age: req.body.age,
-            profile: req.body.profile
+            profile: req.body.profile,
+            fandom: req.body.fandom,
+            interests: req.body.interests,
+            favehero: req.body.favehero,
+            favemovie: req.body.favemovie,
+            faveworld: req.body.faveworld,
+            favetv: req.body.favetv,
+            superpower: req.body.superpower
         }).then(function () {
             res.redirect(307, "/api/login");
         }).catch(function (err) {
@@ -57,77 +52,73 @@ module.exports = function (app) {
         });
     });
 
-    // app.post("/profile", function (req, res) {
-    //     console.log(req.body);
-    //     db.User.findOne({
-    //         where: {
-    //             username: req.params.username
-    //         }
-    //     }).then(function (dbUser) {
-    //         return res.json(dbUser)
-    //     })
-    // })
-
-
     app.get("/api/members", function (req, res) {
         db.User.findAll().then(function (dbUsers) {
             return res.json(dbUsers)
         })
     })
 
-    app.get("/members/:username", function (req, res) {
-        var username = req.params.username
-
+    app.get("/api/members/:username", function (req, res, next) {
+        // var user = req.user
         db.User.findOne({
             where: {
-                username: req.params.username
+                username: req.user.username
             }
-        }).then(function (user) {
-            return res.json(user)
-        })
+        }).then(function (users) {
+            return res.json(users)
+        }).catch(next)
     })
 
-    app.get("/logout", function (req, res) {
-        req.logout();
-        res.render("index");
-    });
-
-
     app.post("/api/login", passport.authenticate("local"), function (req, res) {
-        res.json('/members')
+        res.json('/members');
     });
 
     // ------------------------------
     // Post route for forget password 
     // ------------------------------
 
-    app.post('/forgot', function (req, res, next) {
+    app.post('/api/forgot', function (req, res, next) {
         // Here we are using async module to avoid nesting callbacks within callbacks within callbacks.
         async.waterfall([
             // Generates a unique token for password reset
             function (done) {
+                console.log('generating hash');
+
                 crypto.randomBytes(20, function (err, buf) {
                     var token = buf.toString('hex');
                     done(err, token);
                 });
             },
             function (token, done) {
-                db.User.findOne({ email: req.body.email }, function (err, user) {
-                    if (!user) {
-                        alert('No account with that email address exists.');
+                console.log('getting user from db');
+                db.User.update({
+                    // If email exists in db, we assign the token to the user
+                    resetPasswordToken: token,
+                    // Password reset link expires in an hour
+                    resetPasswordExpires: Date.now() + 3600000
+                }, {
+                    where: {
+                        email: req.body.email
+                    }
+                }).then(function (rowsChanged) {
+                    // if no rows were changed, return an error, redirect
+                    if (!rowsChanged[0]) {
+                        // create an error and return to done
+                        const err = new Error('unable to locate user in db')
+                        done(err)
+                        // alert('No account with that email address exists.');
                         return res.redirect('/forgot');
                     }
-                    // If email exists in db, we assign the token to the user
-                    user.resetPasswordToken = token;
-                    // Password reset link expires in an hour
-                    user.resetPasswordExpires = Date.now() + 3600000;
 
-                    user.save(function (err) {
-                        done(err, token, user);
-                    });
+                    console.log('update user')
+                    done(null, token, {
+                        email: req.body.email
+                    })
                 });
             },
             function (token, user, done) {
+                console.log('sending email');
+
                 const smtpTransport = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
@@ -145,38 +136,63 @@ module.exports = function (app) {
                         'If you did not request this, please ignore this email and your password will remain unchanged.\n'
                 };
                 smtpTransport.sendMail(mailOptions, function (err) {
-                    alert('An e-mail has been sent to ' + user.email + ' with further instructions.');
                     done(err, 'done');
                 });
             }
         ], function (err) {
+            console.error('error object', err)
             if (err) return next(err);
             res.redirect('/forgot');
         });
     });
 
-    app.post('/reset/:token', function (req, res) {
+    app.post('/api/reset', function (req, res) {
         async.waterfall([
             function (done) {
-                User.findOne({ resetPasswordToken: req.params.token, resetPasswordExpires: { $gt: Date.now() } }, function (err, user) {
-                    if (!user) {
-                        alert('Password reset token is invalid or has expired.');
-                        return res.redirect('back');
-                    }
+                // db.User.findOne({
+                //     // const Op = Sequelize.Op;
+                //     where: {
+                //         resetPasswordToken: req.params.token, 
+                //         // resetPasswordExpires: { [Op.gte]: Date.now() }
+                //     }
+                // }).then(function (user) {
+                //             console.log('found user')
+                //             if (!user) {
+                //                 console.log('Password reset token is invalid or has expired.');
+                //                 return res.redirect('back');
+                //             }
+                console.log('getting user from db')
+                console.log(req.body)
+                
+                let encryptedPassword = bcrypt.hashSync(req.body.newPassword, bcrypt.genSaltSync(10), null);
+                console.log(encryptedPassword);
 
-                    user.password = req.body.password;
-                    user.resetPasswordToken = undefined;
-                    user.resetPasswordExpires = undefined;
+                db.User.update({
 
-                    user.save(function (err) {
-                        req.logIn(user, function (err) {
-                            done(err, user);
-                        });
+                        password: encryptedPassword,
+                        resetPasswordToken: undefined,
+                        resetPasswordExpires: undefined
+
+                    }, {
+                        where: {
+                            resetPasswordToken: req.body.token
+                        }
+                    })
+                    .then(function (rowsChanged) {
+                        // if no rows were changed, return an error, redirect
+                        if (!rowsChanged[0]) {
+                            // create an error and return to done
+                            const err = new Error('unable to update user in db, contact website admin')
+                            done(err)
+                            return res.redirect('/forgot');
+                        }
+                        console.log('updated user')
+                        done(null, req.body.email)
                     });
-                });
+                // })
             },
-            function (user, done) {
-                var smtpTransport = nodemailer.createTransport('SMTP', {
+            function (email, done) {
+                var smtpTransport = nodemailer.createTransport({
                     service: 'gmail',
                     auth: {
                         user: 'mikenodemailer@gmail.com',
@@ -184,32 +200,41 @@ module.exports = function (app) {
                     }
                 });
                 var mailOptions = {
-                    to: user.email,
+                    to: email,
                     from: 'mikenodemailer@gmail.com',
                     subject: 'Your Congregeek password has been changed',
                     text: 'Hello,\n\n' +
-                        'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+                        'This is a confirmation that the password for your account ' + email + ' has just been changed.\n'
                 };
                 smtpTransport.sendMail(mailOptions, function (err) {
-                    alert('Success! Your password has been changed.');
-                    done(err);
+                    done(err) 
                 });
             }
         ], function (err) {
-            res.redirect('/');
+            console.error('error object', err)
+            if (err) return next(err);
+            res.redirect('/index');
         });
     });
 
 
-    app.delete("/", function (req, res) {
-        db.destroy({
-                where: {
-                    id: req.params.id
-                }
-            })
-            .then(function () {
-                console.log("username has been succesfully deleted")
-                res.redirect('/')
-            });
-    })
+    // app.delete("/", function (req, res) {
+    //     db.User.destroy({
+    //             where: {
+    //                 id: req.params.id
+    //             }
+    //         })
+    //         .then(function () {
+    //             console.log("username has been succesfully deleted")
+    //             res.redirect('/')
+    //         });
+    // })
+
+    // db.User.update("/", {
+    //     where:{
+    //         id: req.params.id
+    //     }
+    // })
+    // .then(function(db){
+    // console.log(db);});
 }
